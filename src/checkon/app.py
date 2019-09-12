@@ -106,11 +106,13 @@ def run_one(project_url, inject: str):
 
     clone_tempdir = pathlib.Path(tempfile.TemporaryDirectory().name)
     subprocess.run(["git", "clone", str(project_url), str(clone_tempdir)], check=True)
+
     rev_hash = (
         subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=clone_tempdir)
         .decode()
         .strip()
     )
+
     project_tempdir = pathlib.Path("/tmp/checkon/" + str(rev_hash))
     project_tempdir.parent.mkdir(exist_ok=True)
 
@@ -131,6 +133,7 @@ def run_one(project_url, inject: str):
             ],
             cwd=str(project_tempdir),
             check=False,
+            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
         )
 
     # Install the `trial` patch.
@@ -144,6 +147,7 @@ def run_one(project_url, inject: str):
             "python -m pip install checkon-trial",
         ],
         cwd=str(project_tempdir),
+        env={k: v for k, v in os.environ.items() if k != "TOXENV"},
     )
 
     # TODO Install the `unittest` patch by adding a pth or PYTHONPATH replacing `unittest` on sys.path.
@@ -158,6 +162,7 @@ def run_one(project_url, inject: str):
             "python -m pip install --force " + shlex.quote(str(inject)),
         ],
         cwd=str(project_tempdir),
+        env={k: v for k, v in os.environ.items() if k != "TOXENV"},
     )
 
     # Get environment names.
@@ -167,6 +172,7 @@ def run_one(project_url, inject: str):
             cwd=str(project_tempdir),
             capture_output=True,
             check=True,
+            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
         )
         .stdout.decode()
         .splitlines()
@@ -188,7 +194,7 @@ def run_one(project_url, inject: str):
             "JUNITXML_PATH": test_output_file,
             **os.environ,
         }
-        del env["TOXENV"]
+        env.pop("TOXENV", None)
         subprocess.run(
             [
                 sys.executable,
