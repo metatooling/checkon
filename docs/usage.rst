@@ -34,7 +34,7 @@ Checkon will clone ``lib2``, run its test suite, and show if there are any failu
                                                                                                                                                                                                           src/lib2/app.py:7: TypeError
 
 
-You can also retrieve a list of libraries depending on your library from the web:
+Suppose I'm contributing to a popular library like `attrs <http://attrs.org>`__. I can retrieve a list of libraries depending on it from the web:
 
 .. code-block:: bash
 
@@ -45,3 +45,29 @@ You can also retrieve a list of libraries depending on your library from the web
     https://github.com/twisted/twisted
     https://github.com/HypothesisWorks/hypothesis
     https://github.com/pypa/packaging
+
+
+
+And I can run all their tests using my forked version of ``attrs``.
+
+.. code-block:: bash
+
+    % checkon test --inject ../attrs dependents-from-librariesio --limit=5 attrs
+
+
+Or pick test suites in a file:
+
+
+.. code-block:: bash
+
+
+    % cat dependents.txt
+    https://github.com/pytest-dev/pytest
+    https://github.com/Julian/jsonschema
+    https://github.com/twisted/twisted
+    https://github.com/HypothesisWorks/hypothesis
+    https://github.com/pypa/packaging
+
+
+
+    % checkon test --inject ../attrs dependents-from-file ./dependents.txt
