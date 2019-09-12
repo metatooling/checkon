@@ -21,9 +21,9 @@ Overview
     :alt: Documentation Status
 
 
-.. |travis| image:: https://travis-ci.org/metatooling/checkon.svg?branch=master
+.. |travis| image:: https://img.shields.io/travis/com/metatooling/checkon/master
     :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/metatooling/checkon
+    :target: https://travis-ci.com/metatooling/checkon
 
 .. |version| image:: https://img.shields.io/pypi/v/checkon.svg
     :alt: PyPI Package latest release
