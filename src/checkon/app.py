@@ -182,6 +182,13 @@ def run_one(project_url, inject: str):
         output_dir.mkdir(exist_ok=True, parents=True)
         test_output_file = output_dir / f"test_{envname}.xml"
         tox_output_file = output_dir / f"tox_{envname}.json"
+        env = {
+            "TOX_TESTENV_PASSENV": "PYTEST_ADDOPTS",
+            "PYTEST_ADDOPTS": f"--tb=long --junitxml={test_output_file}",
+            "JUNITXML_PATH": test_output_file,
+            **os.environ,
+        }
+        del env["TOXENV"]
         subprocess.run(
             [
                 sys.executable,
@@ -194,12 +201,7 @@ def run_one(project_url, inject: str):
             ],
             cwd=str(project_tempdir),
             check=False,
-            env={
-                "TOX_TESTENV_PASSENV": "PYTEST_ADDOPTS",
-                "PYTEST_ADDOPTS": f"--tb=long --junitxml={test_output_file}",
-                "JUNITXML_PATH": test_output_file,
-                **os.environ,
-            },
+            env=env,
         )
 
     return results.AppSuiteRun(
