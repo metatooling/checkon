@@ -52,14 +52,6 @@ checkon.tmp2 module
    :undoc-members:
    :show-inheritance:
 
-checkon.tmp3 module
--------------------
-
-.. automodule:: checkon.tmp3
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 checkon.tox module
 ------------------
 
