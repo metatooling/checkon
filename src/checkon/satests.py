@@ -247,7 +247,7 @@ class Database:
 
     @transform.register
     def _(self, run: checkon.results.AppSuiteRun):
-        print(run)
+
         tox_run = ToxRun(application=run.dependent_result.url, provider=run.injected)
         toxenv_runs = [
             self.transform(depresult, tox_run=tox_run)
@@ -258,8 +258,6 @@ class Database:
 
 def insert_result(db: Database, result: checkon.results.DependentResult):
     out = db.transform(result)
-    print(out)
-    # import pudb; pudb.set_trace()
     db.session.add(out)
     db.session.commit()
 
