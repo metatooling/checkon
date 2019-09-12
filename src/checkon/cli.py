@@ -14,12 +14,21 @@ def run_cli(urls_lists, hide_passed, **kw):
     print(app.run_many(project_urls=urls, **kw))
 
 
-def compare_cli(urls_lists, hide_passed, **kw):
+def compare_cli(urls_lists, hide_passed, output_format, **kw):
     urls = [url for urls in urls_lists for url in urls]
     records = checkon.app.compare(project_urls=urls, **kw)
     if hide_passed:
         records = [r for r in records if r["text"] is not None]
-    print(tabulate.tabulate(records, headers="keys"))
+
+    import json
+
+    if output_format == "json":
+        print(json.dumps(records))
+    elif output_format == "table":
+        print(tabulate.tabulate(records, headers="keys"))
+
+    else:
+        raise ValueError(output_format)
 
 
 def read_from_file(file):
@@ -74,6 +83,12 @@ test = click.Group(
     params=[
         click.Option(["--inject"], help="Depdendency version(s).", multiple=True),
         hide_passed,
+        click.Option(
+            ["--output-format"],
+            type=click.Choice(["json", "table"]),
+            default="table",
+            help="Output format",
+        ),
     ],
     result_callback=compare_cli,
     chain=True,
