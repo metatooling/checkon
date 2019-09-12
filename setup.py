@@ -17,7 +17,7 @@ install_requires = [
     "marshmallow-dataclass==6.0.0rc5",
     "marshmallow>=3.0,<4.0",
     "pendulum>=2.0,<3.0",
-    "pyrsistent>=0.15.4,<0.16.0",
+    "pyrsistent>=0.14.11,<0.15.0",
     "requests>=2.22,<3.0",
     "requirements-parser>=0.2.0,<0.3.0",
     "sqlalchemy>=1.3,<2.0",
