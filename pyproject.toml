@@ -46,6 +46,7 @@ pygments = {version = "^2.4", allows-prereleases = true}
 pudb = "^2019.1"
 ipython = "^7.8"
 pp-ez = "^0.2.0"
+sphinx_autodoc_typehints = "^1.7"
 
 [tool.poetry.extras]
 docs = [
