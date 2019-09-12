@@ -112,6 +112,7 @@ def run_one(project_url, inject: str):
         .strip()
     )
     project_tempdir = pathlib.Path("/tmp/checkon/" + str(rev_hash))
+    project_tempdir.parent.mkdir(exist_ok=True)
 
     if not project_tempdir.exists():
         clone_tempdir.rename(project_tempdir)
