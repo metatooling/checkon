@@ -219,22 +219,6 @@ def run_many(project_urls: t.List[str], inject: str) -> t.List[results.Dependent
     return url_to_res
 
 
-def extract_failed_tests(
-    dependent_result: results.DependentResult
-) -> t.Set[results.FailedTest]:
-    out = set()
-    for suite_run in dependent_result.suite_runs:
-        suite = suite_run.suite
-
-        for test in suite.test_cases:
-            if test.failure is not None:
-                failed = results.FailedTest.from_test_case(test)
-
-                out.add(failed)
-
-    return frozenset(out)
-
-
 def compare(project_urls: t.List[str], inject: t.Sequence[str]):
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
