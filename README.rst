@@ -21,21 +21,21 @@ Overview
     :alt: Documentation Status
 
 
-.. |travis| image:: https://travis-ci.org/python-checkon/checkon.svg?branch=master
+.. |travis| image:: https://travis-ci.org/metatooling/checkon.svg?branch=master
     :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/python-checkon/checkon
+    :target: https://travis-ci.org/metatooling/checkon
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/python-checkon/checkon?branch=master&svg=true
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/metatooling/checkon?branch=master&svg=true
     :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/python-checkon/checkon
+    :target: https://ci.appveyor.com/project/metatooling/checkon
 
 .. |version| image:: https://img.shields.io/pypi/v/checkon.svg
     :alt: PyPI Package latest release
     :target: https://pypi.org/pypi/checkon
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/python-checkon/checkon/v0.1.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/metatooling/checkon/v0.1.0.svg
     :alt: Commits since latest release
-    :target: https://github.com/python-checkon/checkon/compare/v0.1.0...master
+    :target: https://github.com/metatooling/checkon/compare/v0.1.0...master
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/checkon.svg
     :alt: PyPI Wheel
