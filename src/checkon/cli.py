@@ -8,7 +8,7 @@ import checkon.results
 from . import app
 
 
-def run_cli(urls_lists, **kw):
+def run_cli(urls_lists, hide_passed, **kw):
     urls = [url for urls in urls_lists for url in urls]
 
     print(app.run_many(project_urls=urls, **kw))
@@ -63,10 +63,8 @@ dependents = [
 ]
 
 
-hide_passed = (
-    click.Option(
-        ["--hide-passed"], is_flag=True, help="Whether to hide tests that passed."
-    ),
+hide_passed = click.Option(
+    ["--hide-passed"], is_flag=True, help="Whether to hide tests that passed."
 )
 
 test = click.Group(
@@ -89,8 +87,7 @@ compare = click.Group(
     "compare",
     commands={c.name: c for c in dependents},
     params=[
-        click.Option(["--inject-new"], help="The new version of the depdendency."),
-        click.Option(["--inject-base"], help="The old version of the dependency."),
+        click.Option(["--inject"], help="Depdendency version(s).", multiple=True),
         hide_passed,
     ],
     result_callback=compare_cli,

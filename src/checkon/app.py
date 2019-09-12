@@ -234,23 +234,18 @@ def extract_failed_tests(
     return frozenset(out)
 
 
-def compare(project_urls: t.List[str], inject_new: str, inject_base: str):
-    base_result = run_many(project_urls, inject_base)
-    new_result = run_many(project_urls, inject_new)
-
+def compare(project_urls: t.List[str], inject: t.Sequence[str]):
     db = satests.Database.from_string("sqlite:///:memory:", echo=True)
     db.init()
 
-    for url, result in base_result.items():
-        satests.insert_result(db, result)
+    for lib in inject:
+        for result in run_many(project_urls, lib).values():
+            satests.insert_result(db, result)
 
-    for url, result in new_result.items():
-        satests.insert_result(db, result)
-
-    return [dict(zip(d.keys(), d.values())) for d in (db.engine.execute(query))]
+    return [dict(zip(d.keys(), d.values())) for d in (db.engine.execute(QUERY))]
 
 
-query = """
+QUERY = """
 SELECT
     ter.envname,
     tr.application,
