@@ -59,12 +59,25 @@ dependents = [
 ]
 
 
+hide_passed = (
+    click.Option(
+        ["--hide-passed"], is_flag=True, help="Whether to hide tests that passed."
+    ),
+)
+
 test = click.Group(
     "test",
     commands={c.name: c for c in dependents},
-    params=[click.Option(["--inject"]), click.Option(["--hide-passed"], is_flag=True)],
+    params=[
+        click.Option(
+            ["--inject"],
+            help="The depdendency to inject. Accepts any pip requirement specifier.",
+        ),
+        hide_passed,
+    ],
     result_callback=run_cli,
     chain=True,
+    help="Run depdendent libraries' tests using a specific dependency version.",
 )
 
 
@@ -72,22 +85,23 @@ compare = click.Group(
     "compare",
     commands={c.name: c for c in dependents},
     params=[
-        click.Option(["--inject-new"]),
-        click.Option(["--inject-base"]),
-        click.Option(["--hide-passed"], is_flag=True),
+        click.Option(["--inject-new"], help="The new version of the depdendency."),
+        click.Option(["--inject-base"], help="The old version of the dependency."),
+        hide_passed,
     ],
     result_callback=compare_cli,
     chain=True,
+    help="Compare two versions of a depdendency on their depdendents tests.",
 )
-
-
-def list_cli(dicts):
-    return dicts
-
 
 list_commands = click.Group(
-    "list", commands={c.name: c for c in dependents}, result_callback=list_cli
+    "list",
+    commands={c.name: c for c in dependents},
+    result_callback=lambda x: x,
+    help="List dependent libraries of a depdendency.",
 )
 cli = click.Group(
-    "run", commands={"test": test, "list": list_commands, "compare": compare}
+    "run",
+    commands={"test": test, "list": list_commands, "compare": compare},
+    help="Run tests of dependent packages using different versions of a depdendency library.",
 )
