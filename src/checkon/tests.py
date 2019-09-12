@@ -1,8 +1,8 @@
+import dataclasses
 import datetime
 import typing as t
 
 import attr
-import dataclasses
 
 
 @dataclasses.dataclass(frozen=True)

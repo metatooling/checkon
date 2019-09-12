@@ -1,3 +1,4 @@
+import dataclasses
 import datetime
 import json
 import pathlib
@@ -5,7 +6,6 @@ import textwrap
 import typing as t
 
 import attr
-import dataclasses
 import marshmallow
 import marshmallow_dataclass
 import pyrsistent
