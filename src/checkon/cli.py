@@ -1,22 +1,24 @@
 import pathlib
 
+import attr
 import click
 import tabulate
+import toml
 
 import checkon.results
 
 from . import app
 
 
-def run_cli(urls_lists, hide_passed, **kw):
-    urls = [url for urls in urls_lists for url in urls]
+def run_cli(dependents_lists, hide_passed, **kw):
+    dependents = [d for ds in dependents_lists for d in ds]
 
-    print(app.run_many(project_urls=urls, **kw))
+    print(app.run_many(dependents=dependents, **kw))
 
 
-def compare_cli(urls_lists, hide_passed, output_format, **kw):
-    urls = [url for urls in urls_lists for url in urls]
-    records = checkon.app.compare(project_urls=urls, **kw)
+def compare_cli(dependents_lists, hide_passed, output_format, **kw):
+    dependents = [d for ds in dependents_lists for d in ds]
+    records = checkon.app.compare(dependents=dependents, **kw)
     if hide_passed:
         records = [r for r in records if r["text"] is not None]
 
@@ -32,7 +34,8 @@ def compare_cli(urls_lists, hide_passed, output_format, **kw):
 
 
 def read_from_file(file):
-    return [line.strip() for line in file.readlines()]
+    dependents_ = toml.load(file)["dependents"]
+    return [app.Dependent(d["repository"], d["toxenv_glob"]) for d in dependents_]
 
 
 dependents = [
@@ -60,13 +63,15 @@ dependents = [
     click.Command(
         "dependents-from-file",
         params=[click.Argument(["file"], type=click.File())],
-        help="List dependent project urls in a file, line-separated.",
+        help="List dependent project urls in a toml file.",
         callback=read_from_file,
     ),
     click.Command(
         "dependents",
         params=[click.Argument(["dependents"], nargs=-1, required=True)],
-        callback=lambda dependents: list(dependents),
+        callback=lambda repositorys: [
+            app.Dependent(repository, "*") for repository in repositorys
+        ],
         help="List dependent project urls on the command line.",
     ),
 ]
@@ -89,21 +94,28 @@ test = click.Group(
             default="table",
             help="Output format",
         ),
-        click.Option(["--toxenvs", "--toxenv"], type=lambda s: s.split(",")),
     ],
     result_callback=compare_cli,
     chain=True,
     help="Compare multiple versions of a depdendency on their depdendents tests.",
 )
 
-list_commands = click.Group(
-    "list",
+
+def make_config(dependents):
+
+    return toml.dumps({"dependents": [attr.asdict(d) for d in dependents]})
+
+
+make_config_cli = click.Group(
+    "make-config",
     commands={c.name: c for c in dependents},
-    result_callback=lambda x: print("\n".join(x)),
-    help="List dependent libraries of a depdendency.",
+    result_callback=lambda ds: print(
+        make_config(ds)
+    ),  # lambda **kw: print(make_config(**kw)),
+    help="Make toml configuration of dependent libraries.",
 )
 cli = click.Group(
     "run",
-    commands={"list": list_commands, "test": test},
+    commands={"make-config": make_config_cli, "test": test},
     help="Run tests of dependent packages using different versions of a depdendency library.",
 )

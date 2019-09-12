@@ -26,6 +26,12 @@ os.environ.pop("TOXENV", None)
 
 
 @attr.dataclass(frozen=True)
+class Dependent:
+    repository: str
+    toxenv_glob: str
+
+
+@attr.dataclass(frozen=True)
 class Project:
     test_command: t.Sequence[str] = attr.ib(
         default=["tox"], converter=pyrsistent.freeze
@@ -85,7 +91,7 @@ def get_dependents(pypi_name, api_key, limit):
     response = requests.get(url)
 
     return [
-        project["repository_url"]
+        Dependent(project["repository_url"], "*")
         for project in response.json()
         if project["repository_url"]
     ]
@@ -102,14 +108,20 @@ def resolve_inject(inject):
     return inject
 
 
-def run_one(project_url, inject: str, toxenvs: t.List[str]):
-    print(project_url)
+def run_toxenv(dependent: Dependent, toxenv: str, inject: str):
+    # TODO Refactor to fill this out.
+    ...
+
+
+def run_one(dependent, inject: str):
 
     results_dir = pathlib.Path(tempfile.TemporaryDirectory().name)
     results_dir.mkdir(exist_ok=True, parents=True)
 
     clone_tempdir = pathlib.Path(tempfile.TemporaryDirectory().name)
-    subprocess.run(["git", "clone", str(project_url), str(clone_tempdir)], check=True)
+    subprocess.run(
+        ["git", "clone", dependent.repository, str(clone_tempdir)], check=True
+    )
 
     rev_hash = (
         subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=clone_tempdir)
@@ -128,7 +140,6 @@ def run_one(project_url, inject: str, toxenvs: t.List[str]):
         # Create the envs and install deps.
         subprocess.run(
             tox
-            + list(",".join(toxenvs) if toxenvs else [])
             + [
                 "--notest",
                 "-c",
@@ -154,7 +165,6 @@ def run_one(project_url, inject: str, toxenvs: t.List[str]):
     # Install the injection into each venv
     subprocess.run(
         tox
-        + list(",".join(toxenvs) if toxenvs else [])
         + [
             "--run-command",
             "python -m pip install --force " + shlex.quote(str(inject)),
@@ -175,11 +185,11 @@ def run_one(project_url, inject: str, toxenvs: t.List[str]):
         .stdout.decode()
         .splitlines()
     )
+    envnames = [
+        name for name in envnames if fnmatch.fnmatch(name, dependent.toxenv_glob)
+    ]
 
     for envname in envnames:
-
-        if toxenvs and not any(fnmatch.fnmatch(envname, f"*{e}*") for e in toxenvs):
-            continue
 
         # Run the environment.
         output_dir = results_dir / envname
@@ -203,28 +213,29 @@ def run_one(project_url, inject: str, toxenvs: t.List[str]):
     return results.AppSuiteRun(
         injected=inject,
         dependent_result=results.DependentResult.from_dir(
-            output_dir=results_dir, url=project_url
+            output_dir=results_dir, url=dependent.repository
         ),
     )
 
 
 def run_many(
-    project_urls: t.List[str], inject: str, toxenvs: t.List[str]
+    dependents: t.List[Dependent], inject: str
 ) -> t.List[results.DependentResult]:
     inject = resolve_inject(inject)
     url_to_res = {}
-    for url in project_urls:
-        url_to_res[url] = run_one(project_url=url, inject=inject, toxenvs=toxenvs)
+    print(dependents)
+    for dependent in dependents:
+        url_to_res[dependent.repository] = run_one(dependent, inject=inject)
 
     return url_to_res
 
 
-def compare(project_urls: t.List[str], inject: t.Sequence[str], toxenvs: t.List[str]):
+def compare(dependents: t.List[Dependent], inject: t.Sequence[str]):
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
 
     for lib in inject:
-        for result in run_many(project_urls, lib, toxenvs=toxenvs).values():
+        for result in run_many(dependents, lib).values():
             satests.insert_result(db, result)
 
     return [dict(zip(d.keys(), d.values())) for d in (db.engine.execute(QUERY))]
