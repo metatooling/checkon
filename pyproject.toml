@@ -2,8 +2,8 @@
 [tool.poetry]
 name = "checkon"
 version = "0.1.0" # PACKAGE_VERSION  (This comment helps bumpversion find the right line.)
-description = ""
-authors = ["Checkon contributors <email@example.com>"]
+description = "Support backward compatibility by running your users' test suites."
+authors = ["Checkon contributors <checkon@cordaz.com>"]
 readme = "README.rst"
 license = "GPL-3.0"
 
