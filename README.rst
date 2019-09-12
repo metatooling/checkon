@@ -10,7 +10,7 @@ Overview
     * - docs
       - |docs|
     * - tests
-      - | |travis| |appveyor|
+      - | |travis|
         |
     * - package
       - | |version| |wheel| |supported-versions| |supported-implementations|
@@ -24,10 +24,6 @@ Overview
 .. |travis| image:: https://travis-ci.org/metatooling/checkon.svg?branch=master
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/metatooling/checkon
-
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/metatooling/checkon?branch=master&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/metatooling/checkon
 
 .. |version| image:: https://img.shields.io/pypi/v/checkon.svg
     :alt: PyPI Package latest release
@@ -52,9 +48,8 @@ Overview
 
 .. end-badges
 
-An example package. Generated with cookiecutter-pylibrary.
 
-* Free software: BSD 2-Clause License
+
 
 Installation
 ============
@@ -68,28 +63,3 @@ Documentation
 
 
 https://checkon.readthedocs.io/
-
-
-Development
-===========
-
-To run the all tests run::
-
-    tox
-
-Note, to combine the coverage data from all the tox environments run:
-
-.. list-table::
-    :widths: 10 90
-    :stub-columns: 1
-
-    - - Windows
-      - ::
-
-            set PYTEST_ADDOPTS=--cov-append
-            tox
-
-    - - Other
-      - ::
-
-            PYTEST_ADDOPTS=--cov-append tox
