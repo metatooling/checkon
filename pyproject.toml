@@ -5,6 +5,7 @@ version = "0.1.0" # PACKAGE_VERSION  (This comment helps bumpversion find the ri
 description = ""
 authors = ["Checkon contributors <email@example.com>"]
 readme = "README.rst"
+license = "GPL-3.0"
 
 [tool.poetry.dependencies]
 python = "^3.7"
