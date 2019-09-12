@@ -3,6 +3,7 @@ import fnmatch
 import os
 import pathlib
 import shlex
+import shutil
 import site
 import subprocess
 import sys
@@ -101,7 +102,7 @@ def resolve_inject(inject):
     return inject
 
 
-def run_one(project_url, inject: str):
+def run_one(project_url, inject: str, toxenvs: t.List[str]):
     print(project_url)
 
     results_dir = pathlib.Path(tempfile.TemporaryDirectory().name)
@@ -116,18 +117,19 @@ def run_one(project_url, inject: str):
         .strip()
     )
 
-    project_tempdir = pathlib.Path("/tmp/checkon/" + str(rev_hash))
+    project_tempdir = pathlib.Path(".checkon/" + str(rev_hash))
     project_tempdir.parent.mkdir(exist_ok=True)
 
+    tox = [sys.executable, "-m", "tox"]
+
     if not project_tempdir.exists():
-        clone_tempdir.rename(project_tempdir)
+        shutil.move(clone_tempdir, project_tempdir)
 
         # Create the envs and install deps.
         subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "tox",
+            tox
+            + list(",".join(toxenvs) if toxenvs else [])
+            + [
                 "--notest",
                 "-c",
                 str(project_tempdir),
@@ -142,13 +144,7 @@ def run_one(project_url, inject: str):
     # Install the `trial` patch.
     # TODO Put the original `trial` back afterwards.
     subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "tox",
-            "--run-command",
-            "python -m pip install checkon-trial",
-        ],
+        tox + ["--run-command", "python -m pip install checkon-trial"],
         cwd=str(project_tempdir),
         env={k: v for k, v in os.environ.items() if k != "TOXENV"},
     )
@@ -157,10 +153,9 @@ def run_one(project_url, inject: str):
 
     # Install the injection into each venv
     subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "tox",
+        tox
+        + list(",".join(toxenvs) if toxenvs else [])
+        + [
             "--run-command",
             "python -m pip install --force " + shlex.quote(str(inject)),
         ],
@@ -171,7 +166,7 @@ def run_one(project_url, inject: str):
     # Get environment names.
     envnames = (
         subprocess.run(
-            [sys.executable, "-m", "tox", "-l"],
+            tox + ["-l"],
             cwd=str(project_tempdir),
             capture_output=True,
             check=True,
@@ -180,7 +175,7 @@ def run_one(project_url, inject: str):
         .stdout.decode()
         .splitlines()
     )
-    toxenvs = [env for env in os.environ.get("TOXENV", "").split(",") if env]
+
     for envname in envnames:
 
         if toxenvs and not any(fnmatch.fnmatch(envname, f"*{e}*") for e in toxenvs):
@@ -199,15 +194,7 @@ def run_one(project_url, inject: str):
         }
         env.pop("TOXENV", None)
         subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "tox",
-                "--result-json",
-                str(tox_output_file),
-                "-e",
-                envname,
-            ],
+            tox + ["--result-json", str(tox_output_file), "-e", envname],
             cwd=str(project_tempdir),
             check=False,
             env=env,
@@ -221,21 +208,23 @@ def run_one(project_url, inject: str):
     )
 
 
-def run_many(project_urls: t.List[str], inject: str) -> t.List[results.DependentResult]:
+def run_many(
+    project_urls: t.List[str], inject: str, toxenvs: t.List[str]
+) -> t.List[results.DependentResult]:
     inject = resolve_inject(inject)
     url_to_res = {}
     for url in project_urls:
-        url_to_res[url] = run_one(project_url=url, inject=inject)
+        url_to_res[url] = run_one(project_url=url, inject=inject, toxenvs=toxenvs)
 
     return url_to_res
 
 
-def compare(project_urls: t.List[str], inject: t.Sequence[str]):
+def compare(project_urls: t.List[str], inject: t.Sequence[str], toxenvs: t.List[str]):
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
 
     for lib in inject:
-        for result in run_many(project_urls, lib).values():
+        for result in run_many(project_urls, lib, toxenvs=toxenvs).values():
             satests.insert_result(db, result)
 
     return [dict(zip(d.keys(), d.values())) for d in (db.engine.execute(QUERY))]

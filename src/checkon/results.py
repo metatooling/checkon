@@ -92,8 +92,25 @@ class ToxTestSuiteRun:
 
     @classmethod
     def from_dir(cls, toxenv_dir):
-        [path] = toxenv_dir.glob("test_*.xml")
-        [suite] = TestSuiteRun.from_path(path)
+
+        paths = toxenv_dir.glob("test_*.xml")
+
+        try:
+            [path] = paths
+        except ValueError:
+            suite = TestSuiteRun(
+                errors=0,
+                failures=0,
+                skipped=0,
+                tests=0,
+                time="",
+                timestamp=datetime.datetime.utcnow(),
+                hostname=platform.node(),
+                name="",
+                test_cases=[],
+            )
+        else:
+            [suite] = TestSuiteRun.from_path(path)
 
         [tox_data_path] = toxenv_dir.glob("tox_*.json")
         tox_run = checkon.tox.ToxRun.from_path(tox_data_path)

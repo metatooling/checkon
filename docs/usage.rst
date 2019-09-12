@@ -10,7 +10,7 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 
 .. code-block:: bash
 
-    $ checkon test --inject ../lib1 dependents https://github.com/metatooling/lib2.git
+    $ checkon test --inject ../lib1 dependents https://github.com/metatooling/lib2
 
 Checkon will clone ``lib2``, run its test suite, and show if there are any failures.
 
@@ -19,7 +19,7 @@ Checkon will clone ``lib2``, run its test suite, and show if there are any failu
 
     envname    application                              classname        name          line  provider                                     message                                                         text
     ---------  ---------------------------------------  ---------------  ----------  ------  -------------------------------------------  --------------------------------------------------------------  --------------------------------------------------------------------------------
-    py37       https://github.com/metatooling/lib2.git  tests.test_lib2  test_three       7  git+https://github.com/metatooling/lib1.git  TypeError: add() takes 2 positional arguments but 3 were given  def test_three():
+    py37       https://github.com/metatooling/lib2  tests.test_lib2  test_three       7  git+https://github.com/metatooling/lib1.git  TypeError: add() takes 2 positional arguments but 3 were given  def test_three():
                                                                                                                                                                                                           >       assert lib2.app.add_args([1, 2, 3]) == 6
 
                                                                                                                                                                                                           tests/test_lib2.py:9:
@@ -32,3 +32,16 @@ Checkon will clone ``lib2``, run its test suite, and show if there are any failu
                                                                                                                                                                                                           E       TypeError: add() takes 2 positional arguments but 3 were given
 
                                                                                                                                                                                                           src/lib2/app.py:7: TypeError
+
+
+You can also retrieve a list of libraries depending on your library from the web:
+
+.. code-block:: bash
+
+
+    % checkon list dependents-from-librariesio --limit=5 attrs
+    https://github.com/pytest-dev/pytest
+    https://github.com/Julian/jsonschema
+    https://github.com/twisted/twisted
+    https://github.com/HypothesisWorks/hypothesis
+    https://github.com/pypa/packaging

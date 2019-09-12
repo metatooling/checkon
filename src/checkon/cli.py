@@ -89,6 +89,7 @@ test = click.Group(
             default="table",
             help="Output format",
         ),
+        click.Option(["--toxenvs", "--toxenv"], type=lambda s: s.split(",")),
     ],
     result_callback=compare_cli,
     chain=True,
