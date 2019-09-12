@@ -21,6 +21,9 @@ from . import results
 from . import satests
 
 
+os.environ.pop("TOXENV", None)
+
+
 @attr.dataclass(frozen=True)
 class Project:
     test_command: t.Sequence[str] = attr.ib(
