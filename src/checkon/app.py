@@ -235,7 +235,7 @@ def extract_failed_tests(
 
 
 def compare(project_urls: t.List[str], inject: t.Sequence[str]):
-    db = satests.Database.from_string("sqlite:///:memory:", echo=True)
+    db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
 
     for lib in inject:
