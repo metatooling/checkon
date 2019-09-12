@@ -28,21 +28,25 @@ def read_from_file(file):
 
 dependents = [
     click.Command(
-        "dependents-from-pypi",
+        "dependents-from-librariesio",
         params=[
             click.Argument(["pypi-name"]),
             click.Option(
-                ["--api-key"], required=True, envvar="CHECKON_LIBRARIESIO_API_KEY"
+                ["--api-key"],
+                required=True,
+                envvar="CHECKON_LIBRARIESIO_API_KEY",
+                help="libraries.io API key",
             ),
             click.Option(
                 ["--limit"],
                 type=int,
                 help="Maximum number of dependents to find.",
                 default=5,
+                show_default=True,
             ),
         ],
         callback=app.get_dependents,
-        help="Get dependent projects from PyPI, via https://libraries.io API",
+        help="Get dependent projects on PyPI, via https://libraries.io API",
     ),
     click.Command(
         "dependents-from-file",
@@ -97,7 +101,7 @@ compare = click.Group(
 list_commands = click.Group(
     "list",
     commands={c.name: c for c in dependents},
-    result_callback=lambda x: x,
+    result_callback=lambda x: print("\n".join(x)),
     help="List dependent libraries of a depdendency.",
 )
 cli = click.Group(
