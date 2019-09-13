@@ -137,42 +137,6 @@ def run_one(dependent, inject: str):
     if not project_tempdir.exists():
         shutil.move(clone_tempdir, project_tempdir)
 
-        # Create the envs and install deps.
-        subprocess.run(
-            tox
-            + [
-                "--notest",
-                "-c",
-                str(project_tempdir),
-                "--result-json",
-                str(results_dir / "tox_install.json"),
-            ],
-            cwd=str(project_tempdir),
-            check=False,
-            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
-        )
-
-    # Install the `trial` patch.
-    # TODO Put the original `trial` back afterwards.
-    subprocess.run(
-        tox + ["--run-command", "python -m pip install checkon-trial"],
-        cwd=str(project_tempdir),
-        env={k: v for k, v in os.environ.items() if k != "TOXENV"},
-    )
-
-    # TODO Install the `unittest` patch by adding a pth or PYTHONPATH replacing `unittest` on sys.path.
-
-    # Install the injection into each venv
-    subprocess.run(
-        tox
-        + [
-            "--run-command",
-            "python -m pip install --force " + shlex.quote(str(inject)),
-        ],
-        cwd=str(project_tempdir),
-        env={k: v for k, v in os.environ.items() if k != "TOXENV"},
-    )
-
     # Get environment names.
     envnames = (
         subprocess.run(
@@ -191,20 +155,61 @@ def run_one(dependent, inject: str):
 
     for envname in envnames:
 
+        # Create the envs and install deps.
+        subprocess.run(
+            tox
+            + [
+                "-e",
+                envname,
+                "--notest",
+                "-c",
+                str(project_tempdir),
+                "--result-json",
+                str(results_dir / "tox_install.json"),
+            ],
+            cwd=str(project_tempdir),
+            check=False,
+            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+        )
+
+        # Install the `trial` patch.
+        # TODO Put the original `trial` back afterwards.
+        subprocess.run(
+            tox
+            + ["-e", envname, "--run-command", "python -m pip install checkon-trial"],
+            cwd=str(project_tempdir),
+            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+        )
+
+        # TODO Install the `unittest` patch by adding a pth or PYTHONPATH replacing `unittest` on sys.path.
+
+        # Install the injection into each venv
+        subprocess.run(
+            tox
+            + [
+                "-e",
+                envname,
+                "--run-command",
+                "python -m pip install --force " + shlex.quote(str(inject)),
+            ],
+            cwd=str(project_tempdir),
+            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+        )
+
         # Run the environment.
         output_dir = results_dir / envname
         output_dir.mkdir(exist_ok=True, parents=True)
         test_output_file = output_dir / f"test_{envname}.xml"
         tox_output_file = output_dir / f"tox_{envname}.json"
         env = {
-            "TOX_TESTENV_PASSENV": "PYTEST_ADDOPTS",
+            "TOX_TESTENV_PASSENV": "PYTEST_ADDOPTS JUNITXML_PATH",
             "PYTEST_ADDOPTS": f"--tb=long --junitxml={test_output_file}",
             "JUNITXML_PATH": test_output_file,
             **os.environ,
         }
         env.pop("TOXENV", None)
         subprocess.run(
-            tox + ["--result-json", str(tox_output_file), "-e", envname],
+            tox + ["-e", envname, "--result-json", str(tox_output_file), "-e", envname],
             cwd=str(project_tempdir),
             check=False,
             env=env,
@@ -223,7 +228,7 @@ def run_many(
 ) -> t.List[results.DependentResult]:
     inject = resolve_inject(inject)
     url_to_res = {}
-    print(dependents)
+
     for dependent in dependents:
         url_to_res[dependent.repository] = run_one(dependent, inject=inject)
 

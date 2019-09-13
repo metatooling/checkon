@@ -55,19 +55,21 @@ And I can run all their tests using my forked version of ``attrs``.
     % checkon test --inject ../attrs dependents-from-librariesio --limit=5 attrs
 
 
-Or pick test suites in a file:
+Or pick test suites in a configuration file. The file can specify repositories and tox environments to run.
+
+
+.. code-block:: toml
+
+    # dependents.toml
+    [[dependents]]
+    repository = "https://github.com/Julian/jsonschema"
+    toxenv_glob = "py37*"
+
+    [[dependents]]
+    repository = "https://github.com/twisted/twisted"
+    toxenv_glob = "py37*"
 
 
 .. code-block:: bash
-
-
-    % cat dependents.txt
-    https://github.com/pytest-dev/pytest
-    https://github.com/Julian/jsonschema
-    https://github.com/twisted/twisted
-    https://github.com/HypothesisWorks/hypothesis
-    https://github.com/pypa/packaging
-
-
 
     % checkon test --inject ../attrs dependents-from-file ./dependents.txt

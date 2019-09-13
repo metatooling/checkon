@@ -38,12 +38,13 @@ class FailureField(marshmallow.fields.Field):
 class TestCaseRun:
     name: str
     classname: str
-    file: str
-    line: int
+    file: t.Optional[str]
+    line: t.Optional[int]
     time: str  # TODO pendulum
     failure: t.Optional[Failure] = dataclasses.field(
         metadata={"marshmallow_field": FailureField()}, default=None
     )
+    skipped: t.Any = None
 
 
 @attr.dataclass(frozen=True)
@@ -51,16 +52,17 @@ class TestCaseRun:
 class TestSuiteRun:
     errors: int
     failures: int
-    skipped: int
+
     tests: int
     time: str  # TODO pendulum
-    timestamp: datetime.datetime  # TODO pendulum
-    hostname: str
-    name: str
+    timestamp: t.Optional[datetime.datetime]  # TODO pendulum
+    hostname: t.Optional[str]
+    name: t.Optional[str]
     test_cases: t.List[TestCaseRun] = dataclasses.field(
         metadata={"data_key": "testcase"}
     )
     envname: t.Optional[str]
+    skipped: t.Optional[int] = None
 
     @classmethod
     def from_bytes(cls, data, envname):
@@ -72,14 +74,20 @@ class TestSuiteRun:
             force_list=True,
             cdata_key="lines",
         )
+        if "testsuites" in parsed:
+            [suite] = parsed["testsuites"]
+        else:
 
-        [suite] = parsed["testsuites"]
+            suite = parsed
 
+        # import pudb; pudb.set_trace()
         return schema.load([{**ts, "envname": envname} for ts in suite["testsuite"]])
 
     @classmethod
     def from_path(cls, path):
         envname = path.parent.name
+        print("THEPATH", path)
+
         return cls.from_bytes(pathlib.Path(path).read_bytes(), envname=envname)
 
 
@@ -102,13 +110,13 @@ class ToxTestSuiteRun:
             suite = TestSuiteRun(
                 errors=0,
                 failures=0,
-                skipped=0,
                 tests=0,
                 time="",
                 timestamp=datetime.datetime.utcnow(),
                 hostname=platform.node(),
                 name="",
                 test_cases=[],
+                envname=toxenv_dir.name,
             )
         else:
             [suite] = TestSuiteRun.from_path(path)
@@ -144,8 +152,8 @@ class AppSuiteRun:
 class FailedTest:
     name: str
     classname: str
-    file: str
-    line: str
+    file: t.Optional[str]
+    line: t.Optional[str]
     failure: t.Sequence[Failure] = attr.ib(converter=Failure.from_dict)
 
     @classmethod

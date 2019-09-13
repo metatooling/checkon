@@ -11,6 +11,7 @@ class TestCase:
     classname: str
     file: str
     line: int
+    skipped: t.Any
 
 
 @dataclasses.dataclass(frozen=True)
