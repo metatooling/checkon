@@ -12,9 +12,9 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 
     $ checkon test --inject--new ../lib1 --inject-base git+https://github.com/metatooling/lib1@master dependents https://github.com/metatooling/lib2
 
-Checkon will clone ``lib2``, run its test suite, and show if there are any failures in the
-version on my branch specified by ``--inject-new`` that pass under the ``master`` verion
-on GitHub specified by ``--inject-base``.
+Checkon will clone ``lib2``, run its test suite via ``tox``, and show if there are any
+failures in the version on my branch specified by ``--inject-new`` that pass under the
+``master`` verion on GitHub specified by ``--inject-base``.
 
 
 .. code-block:: text
