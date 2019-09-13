@@ -10,7 +10,7 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 
 .. code-block:: bash
 
-    $ checkon test --inject--new ../lib1 --inject-base git+https://github.com/metatooling/lib1@master dependents https://github.com/metatooling/lib2
+    $ checkon test --inject--new ../lib1 --inject-base git+https://github.com/metatooling/lib1.git@master dependents https://github.com/metatooling/lib2.git
 
 Checkon will clone ``lib2``, run its test suite via ``tox``, and show if there are any
 failures in the version on my branch specified by ``--inject-new`` that pass under the
