@@ -39,7 +39,7 @@ Suppose I'm contributing to a popular library like `attrs <http://attrs.org>`__.
 .. code-block:: bash
 
 
-    % checkon list dependents-from-librariesio --limit=5 attrs
+    $ checkon list dependents-from-librariesio --limit=5 attrs
     https://github.com/pytest-dev/pytest
     https://github.com/Julian/jsonschema
     https://github.com/twisted/twisted
@@ -52,7 +52,7 @@ And I can run all their tests using my forked version of ``attrs``.
 
 .. code-block:: bash
 
-    % checkon test --inject ../attrs dependents-from-librariesio --limit=5 attrs
+    $ checkon test --inject ../attrs dependents-from-librariesio --limit=5 attrs
 
 
 Or pick test suites in a configuration file. The file can specify repositories and tox environments to run.
@@ -72,4 +72,4 @@ Or pick test suites in a configuration file. The file can specify repositories a
 
 .. code-block:: bash
 
-    % checkon test --inject ../attrs dependents-from-file ./dependents.txt
+    $ checkon test --inject ../attrs dependents-from-file ./dependents.txt
