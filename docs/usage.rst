@@ -10,9 +10,11 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 
 .. code-block:: bash
 
-    $ checkon test --inject ../lib1 dependents https://github.com/metatooling/lib2
+    $ checkon test --inject--new ../lib1 --inject-base git+https://github.com/metatooling/lib1@master dependents https://github.com/metatooling/lib2
 
-Checkon will clone ``lib2``, run its test suite, and show if there are any failures.
+Checkon will clone ``lib2``, run its test suite, and show if there are any failures in the
+version on my branch specified by ``--inject-new`` that pass under the ``master`` verion
+on GitHub specified by ``--inject-base``.
 
 
 .. code-block:: text
@@ -52,7 +54,7 @@ And I can run all their tests using my forked version of ``attrs``.
 
 .. code-block:: bash
 
-    $ checkon test --inject ../attrs dependents-from-librariesio --limit=5 attrs
+    $ checkon test --inject-new ../attrs --inject-base git+https://github.com/python-attrs/attrs dependents-from-librariesio --limit=5 attrs
 
 
 Or pick test suites in a configuration file. The file can specify repositories and tox environments to run.
@@ -72,4 +74,4 @@ Or pick test suites in a configuration file. The file can specify repositories a
 
 .. code-block:: bash
 
-    $ checkon test --inject ../attrs dependents-from-file ./dependents.txt
+    $ checkon test --inject-new ../attrs --inject-base git+https://github.com/python-attrs/attrs dependents-from-file ./dependents.txt
