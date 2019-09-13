@@ -1,3 +1,4 @@
+import datetime
 import json
 import pathlib
 import sys
@@ -18,9 +19,11 @@ def run_cli(dependents_lists, **kw):
     print(app.run_many(dependents=dependents, **kw))
 
 
-def compare_cli(dependents_lists, output_format, **kw):
+def compare_cli(dependents_lists, output_format, log_file, **kw):
     dependents = [d for ds in dependents_lists for d in ds]
-    records = checkon.app.test(dependents=dependents, **kw)
+    pathlib.Path(log_file).parent.mkdir(exist_ok=True)
+    with open(log_file, "w") as log_file:
+        records = checkon.app.test(dependents=dependents, log_file=log_file, **kw)
 
     if output_format == "json":
         print(json.dumps(records))
@@ -87,6 +90,11 @@ test = click.Group(
             type=click.Choice(["json", "table"]),
             default="table",
             help="Output format",
+        ),
+        click.Option(
+            ["--log-file"],
+            type=click.Path(allow_dash=True),
+            default=".checkon/logs/" + datetime.datetime.utcnow().isoformat() + ".log",
         ),
     ],
     result_callback=compare_cli,

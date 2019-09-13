@@ -113,14 +113,17 @@ def run_toxenv(dependent: Dependent, toxenv: str, inject: str):
     ...
 
 
-def run_one(dependent, inject: str):
+def run_one(dependent, inject: str, log_file):
 
     results_dir = pathlib.Path(tempfile.TemporaryDirectory().name)
     results_dir.mkdir(exist_ok=True, parents=True)
 
     clone_tempdir = pathlib.Path(tempfile.TemporaryDirectory().name)
     subprocess.run(
-        ["git", "clone", dependent.repository, str(clone_tempdir)], check=True
+        ["git", "clone", dependent.repository, str(clone_tempdir)],
+        check=True,
+        stdout=log_file,
+        stderr=log_file,
     )
 
     rev_hash = (
@@ -170,6 +173,8 @@ def run_one(dependent, inject: str):
             cwd=str(project_tempdir),
             check=False,
             env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+            stdout=log_file,
+            stderr=log_file,
         )
 
         # Install the `trial` patch.
@@ -179,6 +184,8 @@ def run_one(dependent, inject: str):
             + ["-e", envname, "--run-command", "python -m pip install checkon-trial"],
             cwd=str(project_tempdir),
             env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+            stdout=log_file,
+            stderr=log_file,
         )
 
         # TODO Install the `unittest` patch by adding a pth or PYTHONPATH replacing `unittest` on sys.path.
@@ -194,6 +201,8 @@ def run_one(dependent, inject: str):
             ],
             cwd=str(project_tempdir),
             env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+            stdout=log_file,
+            stderr=log_file,
         )
 
         # Run the environment.
@@ -213,6 +222,8 @@ def run_one(dependent, inject: str):
             cwd=str(project_tempdir),
             check=False,
             env=env,
+            stdout=log_file,
+            stderr=log_file,
         )
 
     return results.AppSuiteRun(
@@ -223,22 +234,29 @@ def run_one(dependent, inject: str):
     )
 
 
-def run_many(dependents: t.List[Dependent], inject: str):
+def run_many(dependents: t.List[Dependent], inject: str, log_file):
     inject = resolve_inject(inject)
     url_to_res = {}
 
     for dependent in dependents:
-        url_to_res[dependent.repository] = run_one(dependent, inject=inject)
+        url_to_res[dependent.repository] = run_one(
+            dependent, inject=inject, log_file=log_file
+        )
 
     return url_to_res
 
 
-def test(dependents: t.List[Dependent], inject_new: t.Sequence[str], inject_base: str):
+def test(
+    dependents: t.List[Dependent],
+    inject_new: t.Sequence[str],
+    inject_base: str,
+    log_file,
+):
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
 
     for lib in list(inject_new) + [inject_base]:
-        for result in run_many(dependents, lib).values():
+        for result in run_many(dependents, lib, log_file=log_file).values():
             satests.insert_result(db, result)
 
     if inject_new and inject_base:

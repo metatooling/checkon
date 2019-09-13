@@ -4,26 +4,26 @@ import sys
 
 
 def test_test():
-    output = subprocess.check_output(
+    proc = subprocess.run(
         [
             sys.executable,
             "-m",
             "checkon",
             "test",
             "--output-format=json",
-            "--hide-passed",
-            "--inject",
+            "--inject-new",
             "git+https://github.com/metatooling/lib1.git",
-            "--inject",
+            "--inject-base",
             "git+https://github.com/metatooling/lib1.git@9b874f537d4a21b3de34df32f2b3d51e59240dd2",
             "dependents",
             "https://github.com/metatooling/lib2.git",
-        ]
-    ).decode()
+        ],
+        capture_output=True,
+    )
 
     expected = [
         {
-            "envname": "py37",
+            "envname": "coverage",
             "application": "https://github.com/metatooling/lib2.git",
             "classname": "tests.test_lib2",
             "name": "test_three",
@@ -34,4 +34,4 @@ def test_test():
         }
     ]
 
-    assert json.loads(output.splitlines()[-1]) == expected
+    assert json.loads(proc.stdout.decode()) == expected
