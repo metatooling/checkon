@@ -75,3 +75,14 @@ Or pick test suites in a configuration file. The file can specify repositories a
 .. code-block:: bash
 
     $ checkon test --inject-new ../attrs --inject-base git+https://github.com/python-attrs/attrs dependents-from-file ./dependents.txt
+
+
+I can check all the pull requests in the ``attrs`` repository against specified dependents.
+
+.. code-block:: bash
+
+    $ checkon test \
+    --output-format=json \
+    --inject-pull-requests https://github.com/python-attrs/attrs \
+    --inject-base git+https://github.com/python-attrs/attrs@master \
+    dependents-from-file dependents.toml

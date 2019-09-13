@@ -246,14 +246,46 @@ def run_many(dependents: t.List[Dependent], inject: str, log_file):
     return url_to_res
 
 
+def get_pull_requests(url: hyperlink.URL) -> t.List[str]:
+    url = url.replace(host="api.github.com", path=("repos",) + url.path + ("pulls",))
+
+    r = requests.get(url)
+    r.raise_for_status()
+    pulls = r.json()
+    out = []
+
+    assert isinstance(pulls, list)
+    for pull in pulls:
+
+        head = pull["head"]
+        if head is None:
+            continue
+        repo = head["repo"]
+        if repo is None:
+            continue
+        clone_url = repo["clone_url"]
+
+        ref = head["ref"]
+        if clone_url is None or ref is None:
+            continue
+        out.append(f"{clone_url}@{ref}")
+    return out
+
+
 def test(
     dependents: t.List[Dependent],
-    inject_new: t.Sequence[str],
+    inject_new: t.List[str],
+    inject_pull_requests: str,
     inject_base: str,
     log_file,
 ):
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
+
+    if inject_pull_requests:
+        inject_new = tuple(inject_new) + tuple(get_pull_requests(inject_pull_requests))
+        if not inject_base:
+            inject_base = inject_pull_requests
 
     for lib in list(inject_new) + [inject_base]:
         for result in run_many(dependents, lib, log_file=log_file).values():
