@@ -15,10 +15,10 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 Checkon will clone ``lib2``, run its test suite, and show if there are any failures.
 
 
-.. code-block::
+.. code-block:: text
 
-    envname    application                              classname        name          line  provider                                     message                                                         text
-    ---------  ---------------------------------------  ---------------  ----------  ------  -------------------------------------------  --------------------------------------------------------------  --------------------------------------------------------------------------------
+    envname    application                          classname        name          line  provider                                     message                                                         text
+    ---------  -----------------------------------  ---------------  ----------  ------  -------------------------------------------  --------------------------------------------------------------  --------------------------------------------------------------------------------
     py37       https://github.com/metatooling/lib2  tests.test_lib2  test_three       7  git+https://github.com/metatooling/lib1.git  TypeError: add() takes 2 positional arguments but 3 were given  def test_three():
                                                                                                                                                                                                           >       assert lib2.app.add_args([1, 2, 3]) == 6
 
