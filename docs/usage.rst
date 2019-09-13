@@ -34,7 +34,7 @@ Checkon will clone ``lib2``, run its test suite, and show if there are any failu
                                                                                                                                                                                                           src/lib2/app.py:7: TypeError
 
 
-Suppose I'm contributing to a popular library like `attrs <http://attrs.org>`__. I can retrieve a list of libraries depending on it from the web:
+Suppose I'm contributing to a popular project like `attrs <http://attrs.org>`__. I can retrieve a list of projects depending on it from the web:
 
 .. code-block:: bash
 
