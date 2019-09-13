@@ -86,7 +86,6 @@ class TestSuiteRun:
     @classmethod
     def from_path(cls, path):
         envname = path.parent.name
-        print("THEPATH", path)
 
         return cls.from_bytes(pathlib.Path(path).read_bytes(), envname=envname)
 

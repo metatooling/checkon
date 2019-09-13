@@ -1,4 +1,6 @@
+import json
 import pathlib
+import sys
 
 import attr
 import click
@@ -10,19 +12,15 @@ import checkon.results
 from . import app
 
 
-def run_cli(dependents_lists, hide_passed, **kw):
+def run_cli(dependents_lists, **kw):
     dependents = [d for ds in dependents_lists for d in ds]
 
     print(app.run_many(dependents=dependents, **kw))
 
 
-def compare_cli(dependents_lists, hide_passed, output_format, **kw):
+def compare_cli(dependents_lists, output_format, **kw):
     dependents = [d for ds in dependents_lists for d in ds]
-    records = checkon.app.compare(dependents=dependents, **kw)
-    if hide_passed:
-        records = [r for r in records if r["text"] is not None]
-
-    import json
+    records = checkon.app.test(dependents=dependents, **kw)
 
     if output_format == "json":
         print(json.dumps(records))
@@ -31,6 +29,9 @@ def compare_cli(dependents_lists, hide_passed, output_format, **kw):
 
     else:
         raise ValueError(output_format)
+
+    if records:
+        sys.exit(1)
 
 
 def read_from_file(file):
@@ -75,17 +76,12 @@ dependents = [
 ]
 
 
-hide_passed = click.Option(
-    ["--hide-passed"], is_flag=True, help="Whether to hide tests that passed."
-)
-
-
 test = click.Group(
     "test",
     commands={c.name: c for c in dependents},
     params=[
-        click.Option(["--inject"], help="Depdendency version(s).", multiple=True),
-        hide_passed,
+        click.Option(["--inject-new"], help="Depdendency version(s).", multiple=True),
+        click.Option(["--inject-base"], help="Baseline dependency version."),
         click.Option(
             ["--output-format"],
             type=click.Choice(["json", "table"]),

@@ -223,9 +223,7 @@ def run_one(dependent, inject: str):
     )
 
 
-def run_many(
-    dependents: t.List[Dependent], inject: str
-) -> t.List[results.DependentResult]:
+def run_many(dependents: t.List[Dependent], inject: str):
     inject = resolve_inject(inject)
     url_to_res = {}
 
@@ -235,18 +233,27 @@ def run_many(
     return url_to_res
 
 
-def compare(dependents: t.List[Dependent], inject: t.Sequence[str]):
+def test(dependents: t.List[Dependent], inject_new: t.Sequence[str], inject_base: str):
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
 
-    for lib in inject:
+    for lib in list(inject_new) + [inject_base]:
         for result in run_many(dependents, lib).values():
             satests.insert_result(db, result)
 
-    return [dict(zip(d.keys(), d.values())) for d in (db.engine.execute(QUERY))]
+    if inject_new and inject_base:
+        query = COMPARISON_QUERY
+    else:
+        query = SIMPLE_QUERY
+
+    out = [
+        dict(zip(d.keys(), d.values()))
+        for d in (db.engine.execute(query, (inject_base,) or inject_new))
+    ]
+    return out
 
 
-QUERY = """
+SIMPLE_QUERY = """
 SELECT
     ter.envname,
     tr.application,
@@ -265,4 +272,34 @@ LEFT JOIN tox_run tr ON tr.tox_run_id = ter.tox_run_id
 LEFT JOIN failure_output fo ON tf.failure_output_id = fo.failure_output_id
 LEFT JOIN test_case tc ON tcr.test_case_id = tc.test_case_id
 ORDER BY ter.envname, tr.application, tc.classname, tc.line, tc.name, tr.provider
+"""
+
+
+COMPARISON_QUERY = """
+       WITH result AS (
+       SELECT
+           ter.envname,
+           tr.application,
+           tc.classname,
+           tc.name,
+           tc.line,
+           tr.provider,
+           fo.message,
+           fo.text
+       FROM test_case_run tcr
+       LEFT JOIN test_failure tf ON tcr.test_failure_id = tf.test_failure_id
+       LEFT JOIN test_suite_run tsr ON tsr.test_suite_run_id = tcr.test_suite_run_id
+       LEFT JOIN toxenv_run ter ON ter.test_suite_run_id = tsr.test_suite_run_id
+       LEFT JOIN tox_run tr ON tr.tox_run_id = ter.tox_run_id
+       LEFT JOIN failure_output fo ON tf.failure_output_id = fo.failure_output_id
+       LEFT JOIN test_case tc ON tcr.test_case_id = tc.test_case_id
+       ORDER BY ter.envname, tr.application, tc.classname, tc.line, tc.name, tr.provider
+       )
+       SELECT new.* FROM result base
+       LEFT JOIN result new ON base.name=new.name AND base.classname=new.classname and base.line=new.line
+       WHERE base.provider = ?
+       AND base.message is null and base.text is null
+       AND base.provider != new.provider
+       AND new.message is not null
+
 """
