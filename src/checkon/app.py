@@ -163,7 +163,7 @@ def run_one(dependent, inject: str):
                 envname,
                 "--notest",
                 "-c",
-                str(project_tempdir),
+                str(project_tempdir.resolve()),
                 "--result-json",
                 str(results_dir / "tox_install.json"),
             ],
