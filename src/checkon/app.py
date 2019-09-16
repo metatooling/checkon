@@ -268,7 +268,7 @@ def get_pull_requests(url: hyperlink.URL) -> t.List[str]:
         ref = head["ref"]
         if clone_url is None or ref is None:
             continue
-        out.append(f"{clone_url}@{ref}")
+        out.append(f"git+{clone_url}@{ref}")
     return out
 
 
