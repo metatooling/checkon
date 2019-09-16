@@ -22,6 +22,8 @@ def run_cli(dependents_lists, **kw):
 
 def compare_cli(dependents_lists, output_format, log_file, **kw):
     dependents = [d for ds in dependents_lists for d in ds]
+    if str(log_file) == "-":
+        log_file = "/dev/stdout"
     pathlib.Path(log_file).parent.mkdir(exist_ok=True, parents=True)
     with open(log_file, "w") as log_file:
         records = checkon.app.test(dependents=dependents, log_file=log_file, **kw)
