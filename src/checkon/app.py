@@ -119,8 +119,9 @@ def run_one(dependent, inject: str, log_file):
     results_dir.mkdir(exist_ok=True, parents=True)
 
     clone_tempdir = pathlib.Path(tempfile.TemporaryDirectory().name)
+    print(dependent)
     subprocess.run(
-        ["git", "clone", dependent.repository, str(clone_tempdir)],
+        ["git", "clone", "--quiet", dependent.repository, str(clone_tempdir)],
         check=True,
         stdout=log_file,
         stderr=log_file,
@@ -139,6 +140,9 @@ def run_one(dependent, inject: str, log_file):
 
     if not project_tempdir.exists():
         shutil.move(clone_tempdir, project_tempdir)
+
+    if not (project_tempdir.joinpath("tox.ini")).exists():
+        return None
 
     # Get environment names.
     envnames = (
@@ -238,10 +242,14 @@ def run_many(dependents: t.List[Dependent], inject: str, log_file):
     inject = resolve_inject(inject)
     url_to_res = {}
 
-    for dependent in dependents:
-        url_to_res[dependent.repository] = run_one(
-            dependent, inject=inject, log_file=log_file
-        )
+    for i, dependent in enumerate(dependents):
+        print(i, inject, dependent)
+        result = run_one(dependent, inject=inject, log_file=log_file)
+        if result is None:
+            # There was no tox.
+            # TODO Find a better way to represent this.
+            continue
+        url_to_res[dependent.repository] = result
 
     return url_to_res
 
