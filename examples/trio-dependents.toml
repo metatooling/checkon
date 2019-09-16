@@ -8,5 +8,5 @@ toxenv_glob = "*"
 
 
 [[dependents]]
-repository = "pytest-trio"
+repository = "https://github.com/python-trio/pytest-trio"
 toxenv_glob = "*"
