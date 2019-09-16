@@ -1,3 +1,0 @@
-#!/bin/bash
-
-poetry install && poetry run checkon test --log-file=- --inject-pull-requests=https://github.com/python-trio/trio --inject-base=git+https://github.com/python-trio/trio@master dependents-from-file examples/trio-dependents.toml

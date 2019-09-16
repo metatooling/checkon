@@ -38,11 +38,8 @@ jobs:
     python: 3.7
     dist: xenial
     sudo: required
-    deploy:
-      on:
-        branch: examples
-      provider: script
-      script: ./examples/run-examples
+    env:
+    - TOXENV=examples
 
 
 before_install:
