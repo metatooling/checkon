@@ -1,0 +1,12 @@
+[[dependents]]
+repository = "https://github.com/HyperionGray/trio-websocket"
+toxenv_glob = "*"
+
+[[dependents]]
+repository = "https://github.com/python-trio/hypothesis-trio"
+toxenv_glob = "*"
+
+
+[[dependents]]
+repository = "pytest-trio"
+toxenv_glob = "*"

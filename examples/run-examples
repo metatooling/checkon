@@ -1,0 +1,6 @@
+#!/bin/bash
+
+poetry run checkon test  \
+       --inject-pull-requests https://github.com/python-trio/trio \
+       --inject-base git+https://github.com/python-trio/trio@master \
+       dependents-from-file examples/trio-dependents.toml
