@@ -42,7 +42,7 @@ jobs:
       on:
         branch: release
       provider: script
-      script: bash ci/bump_and_release.bash
+      script: ./examples/run-examples
 
 
 before_install:
