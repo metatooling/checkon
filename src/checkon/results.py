@@ -45,6 +45,9 @@ class TestCaseRun:
         metadata={"marshmallow_field": FailureField()}, default=None
     )
     skipped: t.Any = None
+    system_err: t.Optional[t.Any] = dataclasses.field(
+        metadata={"data_key": "system-err"}, default=None
+    )
 
 
 @attr.dataclass(frozen=True)
