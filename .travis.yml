@@ -40,7 +40,7 @@ jobs:
     sudo: required
     deploy:
       on:
-        branch: release
+        branch: examples
       provider: script
       script: ./examples/run-examples
 
