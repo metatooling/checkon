@@ -49,7 +49,7 @@ Overview
 .. end-badges
 
 
-
+Checkon is a tool to help library maintainers ensure backward-compatibilty by running downstream applications' test suites with library pre-release versions.
 
 Installation
 ============
