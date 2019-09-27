@@ -29,9 +29,9 @@ Overview
     :alt: PyPI Package latest release
     :target: https://pypi.org/pypi/checkon
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/metatooling/checkon/v0.1.3.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/metatooling/checkon/v0.1.4.svg
     :alt: Commits since latest release
-    :target: https://github.com/metatooling/checkon/compare/v0.1.3...master
+    :target: https://github.com/metatooling/checkon/compare/v0.1.4...master
 
 .. |wheel| image:: https://img.shields.io/pypi/wheel/checkon.svg
     :alt: PyPI Wheel
