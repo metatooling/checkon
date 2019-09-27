@@ -78,7 +78,7 @@ dependents = [
     click.Command(
         "dependents",
         params=[click.Argument(["dependents"], nargs=-1, required=True)],
-        callback=lambda dependents: [app.Dependent(repo, "*") for repo in dependents],
+        callback=lambda dependents: [app.Dependent(repo, ".*") for repo in dependents],
         help="List dependent project urls on the command line.",
     ),
 ]
