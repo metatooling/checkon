@@ -1,0 +1,3 @@
+[[dependents]]
+repository = "https://github.com/Julian/venvs"
+toxenv_glob = "*"

@@ -156,6 +156,18 @@ def run_one(dependent, inject: str, log_file):
         .stdout.decode()
         .splitlines()
     )
+    # Run it again in case some garbage was spilled in the first run.
+    envnames = (
+        subprocess.run(
+            tox + ["-l"],
+            cwd=str(project_tempdir),
+            capture_output=True,
+            check=True,
+            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+        )
+        .stdout.decode()
+        .splitlines()
+    )
     envnames = [
         name for name in envnames if fnmatch.fnmatch(name, dependent.toxenv_glob)
     ]
