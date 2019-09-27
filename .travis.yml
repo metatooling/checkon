@@ -33,6 +33,13 @@ jobs:
         branch: release
       provider: script
       script: bash ci/bump_and_release.bash
+  - stage: Run examples.
+    if: branch = examples
+    python: 3.7
+    dist: xenial
+    sudo: required
+    env:
+    - TOXENV=examples
 
 
 before_install:

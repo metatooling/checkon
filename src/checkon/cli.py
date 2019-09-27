@@ -21,8 +21,12 @@ def run_cli(dependents_lists, **kw):
 
 
 def compare_cli(dependents_lists, output_format, log_file, **kw):
+
     dependents = [d for ds in dependents_lists for d in ds]
+    if str(log_file) == "-":
+        log_file = "/dev/stdout"
     pathlib.Path(log_file).parent.mkdir(exist_ok=True, parents=True)
+
     with open(log_file, "w") as log_file:
         records = checkon.app.test(dependents=dependents, log_file=log_file, **kw)
 
@@ -40,7 +44,7 @@ def compare_cli(dependents_lists, output_format, log_file, **kw):
 
 def read_from_file(file):
     dependents_ = toml.load(file)["dependents"]
-    return [app.Dependent(d["repository"], d["toxenv_glob"]) for d in dependents_]
+    return [app.Dependent(d["repository"], d["toxenv_regex"]) for d in dependents_]
 
 
 dependents = [
@@ -74,7 +78,7 @@ dependents = [
     click.Command(
         "dependents",
         params=[click.Argument(["dependents"], nargs=-1, required=True)],
-        callback=lambda dependents: [app.Dependent(repo, "*") for repo in dependents],
+        callback=lambda dependents: [app.Dependent(repo, ".*") for repo in dependents],
         help="List dependent project urls on the command line.",
     ),
 ]
@@ -84,13 +88,13 @@ test = click.Group(
     "test",
     commands={c.name: c for c in dependents},
     params=[
-        click.Option(["--inject-new"], help="Depdendency version(s).", multiple=True),
+        click.Option(["--upstream-new"], help="Depdendency version(s).", multiple=True),
         click.Option(
-            ["--inject-pull-requests"],
+            ["--upstream-pull-requests"],
             type=hyperlink.URL.from_text,
-            help="Inject each of the GitHub pull requests against the `inject-base` version.",
+            help="Inject each of the GitHub pull requests against the `upstream-base` version.",
         ),
-        click.Option(["--inject-base"], help="Baseline dependency version."),
+        click.Option(["--upstream-base"], help="Baseline dependency version."),
         click.Option(
             ["--output-format"],
             type=click.Choice(["json", "table"]),

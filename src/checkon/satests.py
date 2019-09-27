@@ -248,7 +248,7 @@ class Database:
     @transform.register
     def _(self, run: checkon.results.AppSuiteRun):
 
-        tox_run = ToxRun(application=run.dependent_result.url, provider=run.injected)
+        tox_run = ToxRun(application=run.dependent_result.url, provider=run.upstreamed)
         toxenv_runs = [
             self.transform(depresult, tox_run=tox_run)
             for depresult in run.dependent_result.suite_runs

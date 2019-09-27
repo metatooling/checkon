@@ -1,7 +1,7 @@
 import contextlib
-import fnmatch
 import os
 import pathlib
+import re
 import shlex
 import shutil
 import site
@@ -28,7 +28,7 @@ os.environ.pop("TOXENV", None)
 @attr.dataclass(frozen=True)
 class Dependent:
     repository: str
-    toxenv_glob: str
+    toxenv_regex: str
 
 
 @attr.dataclass(frozen=True)
@@ -97,30 +97,31 @@ def get_dependents(pypi_name, api_key, limit):
     ]
 
 
-def resolve_inject(inject):
+def resolve_upstream(upstream):
     """Resolve local requirements path."""
     try:
-        req = list(requirements.parse(inject))[0]
+        req = list(requirements.parse(upstream))[0]
     except pkg_resources.RequirementParseError:
-        req = list(requirements.parse("-e" + str(inject)))[0]
+        req = list(requirements.parse("-e" + str(upstream)))[0]
     if req.path and not req.path.startswith("git+"):
         return str(pathlib.Path(req.path).resolve())
-    return inject
+    return upstream
 
 
-def run_toxenv(dependent: Dependent, toxenv: str, inject: str):
+def run_toxenv(dependent: Dependent, toxenv: str, upstream: str):
     # TODO Refactor to fill this out.
     ...
 
 
-def run_one(dependent, inject: str, log_file):
+def run_one(dependent, upstream: str, log_file):
 
     results_dir = pathlib.Path(tempfile.TemporaryDirectory().name)
     results_dir.mkdir(exist_ok=True, parents=True)
 
     clone_tempdir = pathlib.Path(tempfile.TemporaryDirectory().name)
+
     subprocess.run(
-        ["git", "clone", dependent.repository, str(clone_tempdir)],
+        ["git", "clone", "--quiet", dependent.repository, str(clone_tempdir)],
         check=True,
         stdout=log_file,
         stderr=log_file,
@@ -140,6 +141,9 @@ def run_one(dependent, inject: str, log_file):
     if not project_tempdir.exists():
         shutil.move(clone_tempdir, project_tempdir)
 
+    if not (project_tempdir.joinpath("tox.ini")).exists():
+        return None
+
     # Get environment names.
     envnames = (
         subprocess.run(
@@ -152,9 +156,19 @@ def run_one(dependent, inject: str, log_file):
         .stdout.decode()
         .splitlines()
     )
-    envnames = [
-        name for name in envnames if fnmatch.fnmatch(name, dependent.toxenv_glob)
-    ]
+    # Run it again in case some garbage was spilled in the first run.
+    envnames = (
+        subprocess.run(
+            tox + ["-l"],
+            cwd=str(project_tempdir),
+            capture_output=True,
+            check=True,
+            env={k: v for k, v in os.environ.items() if k != "TOXENV"},
+        )
+        .stdout.decode()
+        .splitlines()
+    )
+    envnames = [name for name in envnames if re.fullmatch(dependent.toxenv_regex, name)]
 
     for envname in envnames:
 
@@ -190,14 +204,14 @@ def run_one(dependent, inject: str, log_file):
 
         # TODO Install the `unittest` patch by adding a pth or PYTHONPATH replacing `unittest` on sys.path.
 
-        # Install the injection into each venv
+        # Install the upstreamion into each venv
         subprocess.run(
             tox
             + [
                 "-e",
                 envname,
                 "--run-command",
-                "python -m pip install --force " + shlex.quote(str(inject)),
+                "python -m pip install --force " + shlex.quote(str(upstream)),
             ],
             cwd=str(project_tempdir),
             env={k: v for k, v in os.environ.items() if k != "TOXENV"},
@@ -227,21 +241,25 @@ def run_one(dependent, inject: str, log_file):
         )
 
     return results.AppSuiteRun(
-        injected=inject,
+        upstreamed=upstream,
         dependent_result=results.DependentResult.from_dir(
             output_dir=results_dir, url=dependent.repository
         ),
     )
 
 
-def run_many(dependents: t.List[Dependent], inject: str, log_file):
-    inject = resolve_inject(inject)
+def run_many(dependents: t.List[Dependent], upstream: str, log_file):
+    upstream = resolve_upstream(upstream)
     url_to_res = {}
 
     for dependent in dependents:
-        url_to_res[dependent.repository] = run_one(
-            dependent, inject=inject, log_file=log_file
-        )
+
+        result = run_one(dependent, upstream=upstream, log_file=log_file)
+        if result is None:
+            # There was no tox.
+            # TODO Find a better way to represent this.
+            continue
+        url_to_res[dependent.repository] = result
 
     return url_to_res
 
@@ -268,37 +286,39 @@ def get_pull_requests(url: hyperlink.URL) -> t.List[str]:
         ref = head["ref"]
         if clone_url is None or ref is None:
             continue
-        out.append(f"{clone_url}@{ref}")
+        out.append(f"git+{clone_url}@{ref}")
     return out
 
 
 def test(
     dependents: t.List[Dependent],
-    inject_new: t.List[str],
-    inject_pull_requests: str,
-    inject_base: str,
+    upstream_new: t.List[str],
+    upstream_pull_requests: str,
+    upstream_base: str,
     log_file,
 ):
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
 
-    if inject_pull_requests:
-        inject_new = tuple(inject_new) + tuple(get_pull_requests(inject_pull_requests))
-        if not inject_base:
-            inject_base = inject_pull_requests
+    if upstream_pull_requests:
+        upstream_new = tuple(upstream_new) + tuple(
+            get_pull_requests(upstream_pull_requests)
+        )
+        if not upstream_base:
+            upstream_base = upstream_pull_requests
 
-    for lib in list(inject_new) + [inject_base]:
+    for lib in list(upstream_new) + [upstream_base]:
         for result in run_many(dependents, lib, log_file=log_file).values():
             satests.insert_result(db, result)
 
-    if inject_new and inject_base:
+    if upstream_new and upstream_base:
         query = COMPARISON_QUERY
     else:
         query = SIMPLE_QUERY
 
     out = [
         dict(zip(d.keys(), d.values()))
-        for d in (db.engine.execute(query, (inject_base,) or inject_new))
+        for d in (db.engine.execute(query, (upstream_base,) or upstream_new))
     ]
     return out
 

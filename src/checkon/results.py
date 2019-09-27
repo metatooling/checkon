@@ -45,6 +45,9 @@ class TestCaseRun:
         metadata={"marshmallow_field": FailureField()}, default=None
     )
     skipped: t.Any = None
+    system_err: t.Optional[t.Any] = dataclasses.field(
+        metadata={"data_key": "system-err"}, default=None
+    )
 
 
 @attr.dataclass(frozen=True)
@@ -80,7 +83,6 @@ class TestSuiteRun:
 
             suite = parsed
 
-        # import pudb; pudb.set_trace()
         return schema.load([{**ts, "envname": envname} for ts in suite["testsuite"]])
 
     @classmethod
@@ -143,7 +145,7 @@ class DependentResult:
 
 @attr.dataclass(frozen=True)
 class AppSuiteRun:
-    injected: str
+    upstreamed: str
     dependent_result: DependentResult
 
 
