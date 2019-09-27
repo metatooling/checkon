@@ -84,8 +84,8 @@ dependents = [
 ]
 
 
-test = click.Group(
-    "test",
+compare = click.Group(
+    "compare",
     commands={c.name: c for c in dependents},
     params=[
         click.Option(["--upstream-new"], help="Depdendency version(s).", multiple=True),
@@ -113,6 +113,41 @@ test = click.Group(
 )
 
 
+def run_test(dependents_lists, upstream, **kw):
+
+    return compare_cli(
+        dependents_lists, upstream_new=upstream, upstream_base=None, **kw
+    )
+
+
+test = click.Group(
+    "test",
+    commands={c.name: c for c in dependents},
+    params=[
+        click.Option(["--upstream"], help="Depdendency version(s).", multiple=True),
+        click.Option(
+            ["--upstream-pull-requests"],
+            type=hyperlink.URL.from_text,
+            help="Inject each of the GitHub pull requests against the `upstream-base` version.",
+        ),
+        click.Option(
+            ["--output-format"],
+            type=click.Choice(["json", "table"]),
+            default="table",
+            help="Output format",
+        ),
+        click.Option(
+            ["--log-file"],
+            type=click.Path(allow_dash=True),
+            default=".checkon/logs/" + datetime.datetime.utcnow().isoformat() + ".log",
+        ),
+    ],
+    result_callback=run_test,
+    chain=True,
+    help="Run downstream test suite ona new upstream version.",
+)
+
+
 def make_config(dependents):
 
     return toml.dumps({"dependents": [attr.asdict(d) for d in dependents]})
@@ -128,6 +163,6 @@ make_config_cli = click.Group(
 )
 cli = click.Group(
     "run",
-    commands={"make-config": make_config_cli, "test": test},
+    commands={"make-config": make_config_cli, "test": test, "compare": compare},
     help="Run tests of dependent packages using different versions of a depdendency library.",
 )

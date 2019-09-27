@@ -4,6 +4,8 @@ import attr
 import marshmallow_dataclass
 import pyrsistent
 
+from . import schemas
+
 
 @attr.s(auto_attribs=True)
 class VersionInfo:
@@ -43,12 +45,20 @@ class Test:
 
 
 @attr.s(auto_attribs=True)
+class InstallPkg:
+    sha256: str
+    basename: str
+
+
+@attr.s(auto_attribs=True)
 class TestEnv:
-    test: t.List[Test]
-    installed_packages: t.List[str] = attr.ib(converter=pyrsistent.freeze)
+
     python: Python
     setup: t.List[Setup]
     name: t.Optional[str]
+    test: t.Optional[t.List[Test]] = None
+    installpkg: t.Optional[InstallPkg] = attr.ib(default=None)
+    installed_packages: t.List[str] = attr.ib(converter=pyrsistent.freeze, factory=list)
 
     @classmethod
     def from_dict(cls, data, name):
@@ -68,6 +78,6 @@ class ToxRun:
 
     @classmethod
     def from_path(cls, path):
-        schema = marshmallow_dataclass.class_schema(cls)()
+        schema = schemas.class_schema(cls)()
         with open(path) as f:
             return schema.loads(f.read())

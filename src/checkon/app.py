@@ -99,6 +99,7 @@ def get_dependents(pypi_name, api_key, limit):
 
 def resolve_upstream(upstream):
     """Resolve local requirements path."""
+
     try:
         req = list(requirements.parse(upstream))[0]
     except pkg_resources.RequirementParseError:
@@ -292,11 +293,13 @@ def get_pull_requests(url: hyperlink.URL) -> t.List[str]:
 
 def test(
     dependents: t.List[Dependent],
-    upstream_new: t.List[str],
+    upstream_new: t.Sequence[str],
     upstream_pull_requests: str,
     upstream_base: str,
     log_file,
 ):
+    # TODO Split this function into two functions, for `compare` and `test`.
+
     db = satests.Database.from_string("sqlite:///:memory:", echo=False)
     db.init()
 
@@ -308,19 +311,21 @@ def test(
             upstream_base = upstream_pull_requests
 
     for lib in list(upstream_new) + [upstream_base]:
+        if lib is None:
+            continue
         for result in run_many(dependents, lib, log_file=log_file).values():
             satests.insert_result(db, result)
 
     if upstream_new and upstream_base:
         query = COMPARISON_QUERY
+        param = (upstream_base,) if upstream_base else upstream_new
+        result = db.engine.execute(query, param)
+
     else:
         query = SIMPLE_QUERY
+        result = db.engine.execute(query)
 
-    out = [
-        dict(zip(d.keys(), d.values()))
-        for d in (db.engine.execute(query, (upstream_base,) or upstream_new))
-    ]
-    return out
+    return [dict(zip(d.keys(), d.values())) for d in result]
 
 
 SIMPLE_QUERY = """
@@ -341,6 +346,7 @@ LEFT JOIN toxenv_run ter ON ter.test_suite_run_id = tsr.test_suite_run_id
 LEFT JOIN tox_run tr ON tr.tox_run_id = ter.tox_run_id
 LEFT JOIN failure_output fo ON tf.failure_output_id = fo.failure_output_id
 LEFT JOIN test_case tc ON tcr.test_case_id = tc.test_case_id
+WHERE fo.message IS NOT NULL
 ORDER BY ter.envname, tr.application, tc.classname, tc.line, tc.name, tr.provider
 """
 

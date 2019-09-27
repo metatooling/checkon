@@ -9,7 +9,7 @@ def test_test():
             sys.executable,
             "-m",
             "checkon",
-            "test",
+            "compare",
             "--log-file",
             "/dev/stderr",
             "--output-format=json",
