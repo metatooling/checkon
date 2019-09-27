@@ -44,7 +44,7 @@ def compare_cli(dependents_lists, output_format, log_file, **kw):
 
 def read_from_file(file):
     dependents_ = toml.load(file)["dependents"]
-    return [app.Dependent(d["repository"], d["toxenv_glob"]) for d in dependents_]
+    return [app.Dependent(d["repository"], d["toxenv_regex"]) for d in dependents_]
 
 
 dependents = [

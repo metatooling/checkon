@@ -54,11 +54,11 @@ Or pick test suites in a configuration file. The file can specify repositories a
     # dependents.toml
     [[dependents]]
     repository = "https://github.com/Julian/jsonschema"
-    toxenv_glob = "py37*"
+    toxenv_regex = "py37"
 
     [[dependents]]
     repository = "https://github.com/twisted/twisted"
-    toxenv_glob = "py37*"
+    toxenv_regex = "py37"
 
 
 .. code-block:: bash

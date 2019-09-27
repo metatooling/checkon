@@ -1,7 +1,7 @@
 import contextlib
-import fnmatch
 import os
 import pathlib
+import re
 import shlex
 import shutil
 import site
@@ -28,7 +28,7 @@ os.environ.pop("TOXENV", None)
 @attr.dataclass(frozen=True)
 class Dependent:
     repository: str
-    toxenv_glob: str
+    toxenv_regex: str
 
 
 @attr.dataclass(frozen=True)
@@ -168,9 +168,7 @@ def run_one(dependent, inject: str, log_file):
         .stdout.decode()
         .splitlines()
     )
-    envnames = [
-        name for name in envnames if fnmatch.fnmatch(name, dependent.toxenv_glob)
-    ]
+    envnames = [name for name in envnames if re.fullmatch(dependent.toxenv_regex, name)]
 
     for envname in envnames:
 
