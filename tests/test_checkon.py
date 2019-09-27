@@ -10,6 +10,8 @@ def test_test():
             "-m",
             "checkon",
             "test",
+            "--log-file",
+            "/dev/stderr",
             "--output-format=json",
             "--inject-new",
             "git+https://github.com/metatooling/lib1.git",

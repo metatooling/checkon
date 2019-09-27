@@ -119,7 +119,7 @@ def run_one(dependent, inject: str, log_file):
     results_dir.mkdir(exist_ok=True, parents=True)
 
     clone_tempdir = pathlib.Path(tempfile.TemporaryDirectory().name)
-    print(dependent)
+
     subprocess.run(
         ["git", "clone", "--quiet", dependent.repository, str(clone_tempdir)],
         check=True,
@@ -242,8 +242,8 @@ def run_many(dependents: t.List[Dependent], inject: str, log_file):
     inject = resolve_inject(inject)
     url_to_res = {}
 
-    for i, dependent in enumerate(dependents):
-        print(i, inject, dependent)
+    for dependent in dependents:
+
         result = run_one(dependent, inject=inject, log_file=log_file)
         if result is None:
             # There was no tox.

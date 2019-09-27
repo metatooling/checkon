@@ -83,7 +83,6 @@ class TestSuiteRun:
 
             suite = parsed
 
-        # import pudb; pudb.set_trace()
         return schema.load([{**ts, "envname": envname} for ts in suite["testsuite"]])
 
     @classmethod
