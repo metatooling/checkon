@@ -17,7 +17,7 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 
 Checkon will clone ``lib2``, run its test suite via ``tox``, and show if there are any
 failures in the version on my branch specified by ``--upstream-new`` that pass under the
-``master`` verion on GitHub specified by ``--upstream-base``. :download:`(Expand.) <table.txt>`
+``master`` verion on GitHub specified by ``--upstream-base``. `(See full table.) <https://raw.githubusercontent.com/metatooling/checkon/master/docs/table.txt>`__.
 
 .. literalinclude:: table.txt
 
