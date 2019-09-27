@@ -51,6 +51,22 @@ Overview
 
 Checkon is a tool to help library maintainers ensure backward-compatibilty by running downstream applications' test suites with library pre-release versions.
 
+Supported meta-runners:
+
+- tox_
+
+Supported test-runners:
+
+- PyTest_
+- Trial_
+
+
+Currently missing support for:
+
+- unittest_
+- nose_
+
+
 Installation
 ============
 
@@ -63,3 +79,10 @@ Documentation
 
 
 https://checkon.readthedocs.io/
+
+
+.. _tox: https://tox.readthedocs.io/en/latest/index.html
+.. _PyTest: https://pytest.org
+.. _Trial: https://twistedmatrix.com/trac/wiki/TwistedTrial
+.. _unittest: https://docs.python.org/3/library/unittest.html
+.. _nose: https://nose.readthedocs.io/en/latest/
