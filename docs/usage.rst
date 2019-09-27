@@ -11,13 +11,13 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 .. code-block:: bash
 
     $ checkon test \
-    --upstream--new ../lib1 \
+    --upstream-new ../lib1 \
     --upstream-base git+https://github.com/metatooling/lib1.git@master \
     dependents https://github.com/metatooling/lib2.git
 
 Checkon will clone ``lib2``, run its test suite via ``tox``, and show if there are any
 failures in the version on my branch specified by ``--upstream-new`` that pass under the
-``master`` verion on GitHub specified by ``--upstream-base``. `(See full table.) <https://raw.githubusercontent.com/metatooling/checkon/master/docs/table.txt>`__.
+``master`` version on GitHub specified by ``--upstream-base``. `(Expand table.) <https://raw.githubusercontent.com/metatooling/checkon/master/docs/table.txt>`__
 
 .. literalinclude:: table.txt
 
@@ -66,7 +66,7 @@ Or pick test suites in a configuration file. The file can specify repositories a
     $ checkon test \
     --upstream-new ../attrs \
     --upstream-base git+https://github.com/python-attrs/attrs \
-    dependents-from-file ./dependents.txt
+    dependents-from-file ./dependents.toml
 
 
 I can check all the pull requests in the ``attrs`` repository against specified dependents.
