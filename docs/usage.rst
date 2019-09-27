@@ -78,3 +78,13 @@ I can check all the pull requests in the ``attrs`` repository against specified 
     --upstream-pull-requests https://github.com/python-attrs/attrs \
     --upstream-base git+https://github.com/python-attrs/attrs@master \
     dependents-from-file dependents.toml
+
+Or check ``master`` against dependents, relative to the latest release.
+
+.. code-block:: bash
+
+    $ checkon test \
+    --output-format=json \
+    --upstream-new https://github.com/python-attrs/attrs@master \
+    --upstream-base git+https://github.com/python-attrs/attrs@19.1.0 \
+    dependents-from-file dependents.toml
