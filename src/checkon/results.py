@@ -145,7 +145,7 @@ class DependentResult:
 
 @attr.dataclass(frozen=True)
 class AppSuiteRun:
-    injected: str
+    upstreamed: str
     dependent_result: DependentResult
 
 

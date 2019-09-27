@@ -88,13 +88,13 @@ test = click.Group(
     "test",
     commands={c.name: c for c in dependents},
     params=[
-        click.Option(["--inject-new"], help="Depdendency version(s).", multiple=True),
+        click.Option(["--upstream-new"], help="Depdendency version(s).", multiple=True),
         click.Option(
-            ["--inject-pull-requests"],
+            ["--upstream-pull-requests"],
             type=hyperlink.URL.from_text,
-            help="Inject each of the GitHub pull requests against the `inject-base` version.",
+            help="Inject each of the GitHub pull requests against the `upstream-base` version.",
         ),
-        click.Option(["--inject-base"], help="Baseline dependency version."),
+        click.Option(["--upstream-base"], help="Baseline dependency version."),
         click.Option(
             ["--output-format"],
             type=click.Choice(["json", "table"]),

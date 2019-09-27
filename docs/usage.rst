@@ -11,13 +11,13 @@ So I want to run ``lib2``'s test suite on the new version of ``lib1``.
 .. code-block:: bash
 
     $ checkon test \
-    --inject--new ../lib1 \
-    --inject-base git+https://github.com/metatooling/lib1.git@master \
+    --upstream--new ../lib1 \
+    --upstream-base git+https://github.com/metatooling/lib1.git@master \
     dependents https://github.com/metatooling/lib2.git
 
 Checkon will clone ``lib2``, run its test suite via ``tox``, and show if there are any
-failures in the version on my branch specified by ``--inject-new`` that pass under the
-``master`` verion on GitHub specified by ``--inject-base``. :download:`(Expand.) <table.txt>`
+failures in the version on my branch specified by ``--upstream-new`` that pass under the
+``master`` verion on GitHub specified by ``--upstream-base``. :download:`(Expand.) <table.txt>`
 
 .. literalinclude:: table.txt
 
@@ -41,8 +41,8 @@ And I can run all their tests using my forked version of ``attrs``.
 .. code-block:: bash
 
     $ checkon test \
-    --inject-new ../attrs \
-    --inject-base git+https://github.com/python-attrs/attrs \
+    --upstream-new ../attrs \
+    --upstream-base git+https://github.com/python-attrs/attrs \
     dependents-from-librariesio --limit=5 attrs
 
 
@@ -64,8 +64,8 @@ Or pick test suites in a configuration file. The file can specify repositories a
 .. code-block:: bash
 
     $ checkon test \
-    --inject-new ../attrs \
-    --inject-base git+https://github.com/python-attrs/attrs \
+    --upstream-new ../attrs \
+    --upstream-base git+https://github.com/python-attrs/attrs \
     dependents-from-file ./dependents.txt
 
 
@@ -75,6 +75,6 @@ I can check all the pull requests in the ``attrs`` repository against specified 
 
     $ checkon test \
     --output-format=json \
-    --inject-pull-requests https://github.com/python-attrs/attrs \
-    --inject-base git+https://github.com/python-attrs/attrs@master \
+    --upstream-pull-requests https://github.com/python-attrs/attrs \
+    --upstream-base git+https://github.com/python-attrs/attrs@master \
     dependents-from-file dependents.toml
