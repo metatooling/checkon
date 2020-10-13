@@ -6,6 +6,7 @@ description = "Support backward compatibility by running your users' test suites
 authors = ["Checkon contributors <checkon@cordaz.com>"]
 readme = "README.rst"
 license = "GPL-3.0"
+url = "https://github.com/metatooling/checkon"
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -25,6 +26,7 @@ sqlalchemy = "^1.3"
 inflection = "^0.3.1"
 tabulate = "^0.8.3"
 toml = "^0.10.0"
+
 [tool.poetry.dev-dependencies]
 bump2version = "^0.5.10"
 coverage = "^4.5"
@@ -44,6 +46,7 @@ pudb = "^2019.1"
 ipython = "^7.8"
 pp-ez = "^0.2.0"
 sphinx_autodoc_typehints = "^1.7"
+
 [tool.poetry.extras]
 docs = [
     "sphinx",
